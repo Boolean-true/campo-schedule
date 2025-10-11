@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Http;
-use ICal\ICal;
 use Carbon\Carbon;
+use ICal\ICal;
+use Illuminate\Support\Facades\Http;
 
 class ScheduleController extends Controller
 {
     // Main page with calendar
-    public function index()
+    public function index(): \Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory
     {
         return view('schedule');
     }
@@ -17,7 +17,7 @@ class ScheduleController extends Controller
     // API-Endpoint, returns events as JSON
     public function events()
     {
-        $icsUrl = env('ICS_URL');
+        $icsUrl = config('schedule.ics_url');
 
         $response = Http::get($icsUrl);
         if ($response->failed()) {
@@ -32,7 +32,7 @@ class ScheduleController extends Controller
             'defaultWeekStart' => 'MO',
         ]);
 
-        $events = collect($ical->events())->map(function ($event) {
+        $events = collect($ical->events())->map(function ($event): ?array {
             // ICS raw data with time zone information
             $startRaw = $event->dtstart ?? '';
             $endRaw = $event->dtend ?? '';
@@ -47,7 +47,7 @@ class ScheduleController extends Controller
                     ->toIso8601String();
                 $endIso = Carbon::createFromFormat('Ymd\THis', $endClean, 'Europe/Berlin')
                     ->toIso8601String();
-            } catch (\Exception $e) {
+            } catch (\Exception) {
                 return null;
             }
 
@@ -63,4 +63,3 @@ class ScheduleController extends Controller
         return response()->json($events);
     }
 }
-
