@@ -22,9 +22,11 @@ class ScheduleCalendar {
     }
 
     getConfig() {
+        const isMobile = window.innerWidth < 768;
+
         return {
             plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin],
-            initialView: 'timeGridWeek',
+            initialView: isMobile ? 'listWeek' : 'timeGridWeek',
             firstDay: 1,
             hiddenDays: [0, 6],
             slotMinTime: '07:00:00',
@@ -34,9 +36,9 @@ class ScheduleCalendar {
             height: 'auto',
             locale: 'de',
             headerToolbar: {
-                left: 'prev,today,next',
+                left: isMobile ? 'prev,next' : 'prev,today,next',
                 center: 'title',
-                right: 'timeGridWeek,timeGridDay,listWeek'
+                right: isMobile ? 'listWeek,timeGridDay' : 'timeGridWeek,timeGridDay,listWeek'
             },
             events: this.loadEvents.bind(this),
             eventColor: '#6366f1',
@@ -44,7 +46,26 @@ class ScheduleCalendar {
             eventDisplay: 'block',
             eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
             eventContent: this.renderEventContent.bind(this),
+            windowResize: this.handleWindowResize.bind(this),
         };
+    }
+
+    handleWindowResize() {
+        const isMobile = window.innerWidth < 768;
+        const currentView = this.calendar.view.type;
+
+        if (isMobile && currentView === 'timeGridWeek') {
+            this.calendar.changeView('listWeek');
+        } else if (!isMobile && currentView === 'listWeek') {
+            this.calendar.changeView('timeGridWeek');
+        }
+
+        // Update header toolbar based on screen size
+        this.calendar.setOption('headerToolbar', {
+            left: isMobile ? 'prev,next' : 'prev,today,next',
+            center: 'title',
+            right: isMobile ? 'listWeek,timeGridDay' : 'timeGridWeek,timeGridDay,listWeek'
+        });
     }
 
     async loadEvents(info, successCallback, failureCallback) {
