@@ -44,10 +44,6 @@ class ScheduleCalendar {
             eventDisplay: 'block',
             eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
             eventContent: this.renderEventContent.bind(this),
-            eventClick: this.handleEventClick.bind(this),
-            selectable: true,
-            selectMirror: true,
-            select: this.handleDateSelect.bind(this)
         };
     }
 
@@ -85,16 +81,6 @@ class ScheduleCalendar {
         };
     }
 
-    handleEventClick(info) {
-        // Handle event click - can be extended later
-        console.log('Event clicked:', info.event);
-    }
-
-    handleDateSelect(info) {
-        // Handle date selection - can be extended later
-        console.log('Date selected:', info);
-        this.calendar.unselect();
-    }
 
     destroy() {
         if (this.calendar) {

@@ -31,6 +31,17 @@
     gap: 0;
 }
 
+/* Remove all focus outlines from FullCalendar buttons */
+.fc .fc-button,
+.fc .fc-button:focus,
+.fc .fc-button:active,
+.fc .fc-button-active,
+.fc .fc-button-active:focus,
+.fc .fc-button-active:active {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
 .fc .fc-button {
     background-color: #4f46e5;
     border-color: #4f46e5;
@@ -60,7 +71,6 @@
 .fc .fc-button:hover {
     background-color: #4338ca;
     border-color: #4338ca;
-    transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(67, 56, 202, 0.4);
 }
 
@@ -73,9 +83,12 @@
 }
 
 .fc .fc-button-active,
-.fc .fc-button-active:hover {
+.fc .fc-button-active:hover,
+.fc .fc-button-active:focus {
     background-color: #3730a3;
     border-color: #3730a3;
+    outline: none;
+    box-shadow: none;
 }
 
 /* Table styles */
@@ -139,7 +152,6 @@
 
 .fc .fc-event:hover {
     filter: brightness(1.1);
-    transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
 }
 
