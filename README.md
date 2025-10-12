@@ -1,12 +1,9 @@
-# Unofficial Campo Wrapper
+# Unofficial Campo Schedule Website
 
-Wrapper for Campo at FAU with Laravel. 
+Displaying the FAU-Campo-Schedule using Laravel.
 
 ## Usage
 
 - Add custom ICS Url to .env as ICS_URL
-- Start Website with "php artisan serve"
+- Start Website with "composer dev"
 
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
