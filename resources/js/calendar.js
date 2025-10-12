@@ -81,7 +81,6 @@ class ScheduleCalendar {
         };
     }
 
-
     destroy() {
         if (this.calendar) {
             this.calendar.destroy();
