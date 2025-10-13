@@ -17,8 +17,12 @@ class EventResource extends JsonResource
             'title' => $event->summary,
             'start' => $event->dtstart,
             'end' => $event->dtend,
-            'location' => $event->location ?? '',
-            'description' => $event->description ?? '',
+            'extendedProps' => [
+                'location' => $event->location ?? '',
+                'description' => $event->description ?? '',
+                'geo' => $event->geo ?? '',
+                'url' => $event->url ?? '',
+            ],
         ];
     }
 }
