@@ -111,10 +111,10 @@ class ScheduleCalendar {
     openLectureModal(event) {
         const modal = this.createModal(event);
         document.body.appendChild(modal);
-        
+
         // Prevent body scrolling
         document.body.style.overflow = 'hidden';
-        
+
         // Trigger animation
         requestAnimationFrame(() => {
             modal.classList.add('opacity-100');
@@ -127,7 +127,7 @@ class ScheduleCalendar {
     createModal(event) {
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 z-[9999] flex items-end sm:items-center justify-center sm:p-4 bg-black/50 backdrop-blur-sm opacity-0 transition-opacity duration-300';
-        
+
         const startTime = new Date(event.start);
         const endTime = new Date(event.end);
         const timeFormatter = new Intl.DateTimeFormat('de-DE', {
@@ -254,7 +254,7 @@ class ScheduleCalendar {
         if (campoLink) {
             campoLink.addEventListener('click', (e) => {
                 e.preventDefault();
-                window.open(e.target.closest('.campo-link').dataset.url, '_blank');
+                window.open(e.target.closest('.campo-link').dataset.url);
             });
         }
 
@@ -275,10 +275,10 @@ class ScheduleCalendar {
         const modalContent = modal.querySelector('.modal-content');
         modalContent.classList.remove('translate-y-0', 'sm:scale-100');
         modalContent.classList.add('translate-y-full', 'sm:translate-y-4', 'sm:scale-95');
-        
+
         // Restore body scrolling
         document.body.style.overflow = '';
-        
+
         setTimeout(() => {
             if (modal.parentNode) {
                 modal.parentNode.removeChild(modal);
@@ -288,27 +288,25 @@ class ScheduleCalendar {
 
     openGoogleMaps(geo, location) {
         const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
+
         let url;
         if (geo && geo.includes(';')) {
-            // Use coordinates if available (format: "lat;lng")
             const coords = geo.replace(';', ',');
-            if (isMobile) {
-                url = `https://maps.google.com/maps?q=${coords}`;
-            } else {
-                url = `https://www.google.com/maps/search/${coords}`;
-            }
+            url = isMobile
+                ? `https://maps.google.com/maps?q=${coords}`
+                : `https://www.google.com/maps/search/${coords}`;
         } else {
-            // Fallback to location name
             const encodedLocation = encodeURIComponent(location);
-            if (isMobile) {
-                url = `https://maps.google.com/maps?q=${encodedLocation}`;
-            } else {
-                url = `https://www.google.com/maps/search/${encodedLocation}`;
-            }
+            url = isMobile
+                ? `https://maps.google.com/maps?q=${encodedLocation}`
+                : `https://www.google.com/maps/search/${encodedLocation}`;
         }
-        
-        window.open(url, '_blank');
+
+        if (isMobile) {
+            window.open(url);
+        } else {
+            window.open(url, '_blank');
+        }
     }
 
     destroy() {
