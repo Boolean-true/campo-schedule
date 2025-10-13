@@ -22,7 +22,14 @@ class EventResource extends JsonResource
                 'description' => $event->description ?? '',
                 'geo' => $event->geo ?? '',
                 'url' => $event->url ?? '',
+                'categories' => $event->categories ?? '',
+                'type' => $this->getEventType($event->categories ?? ''),
             ],
         ];
+    }
+
+    private function getEventType(string $categories): string
+    {
+        return $categories === 'Übung' ? 'uebung' : 'vorlesung';
     }
 }

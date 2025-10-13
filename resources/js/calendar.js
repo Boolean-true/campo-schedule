@@ -41,7 +41,6 @@ class ScheduleCalendar {
                 right: isMobile ? 'listWeek,timeGridDay' : 'timeGridWeek,timeGridDay,listWeek'
             },
             events: this.loadEvents.bind(this),
-            eventColor: '#6366f1',
             eventTextColor: '#fff',
             eventDisplay: 'block',
             slotEventOverlap: false,
@@ -51,6 +50,14 @@ class ScheduleCalendar {
             eventClick: this.handleEventClick.bind(this),
             windowResize: this.handleWindowResize.bind(this),
         };
+    }
+
+    getEventColor(event) {
+        const type = event.extendedProps?.type;
+        if (type === 'uebung') {
+            return '#059669'; // emerald-600
+        }
+        return '#6366f1'; // indigo-500 (default)
     }
 
     handleWindowResize() {
@@ -85,7 +92,11 @@ class ScheduleCalendar {
             }
 
             const data = await response.json();
-            successCallback(data.data || []);
+            const events = (data.data || []).map(event => ({
+                ...event,
+                color: this.getEventColor(event)
+            }));
+            successCallback(events);
         } catch (error) {
             console.error('Failed to load calendar events:', error);
             failureCallback(error);
