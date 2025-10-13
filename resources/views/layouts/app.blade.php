@@ -46,10 +46,9 @@
         @endif
 
         <!-- Page Header -->
-        @if (View::hasSection('header'))
-            <header
-                class="bg-gradient-to-r from-slate-800/80 to-slate-700/80 backdrop-blur-md shadow-lg border-b border-slate-600/50">
-                <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        @if(View::hasSection('header'))
+            <header class="bg-gradient-to-r from-slate-800/80 to-slate-700/80 backdrop-blur-md shadow-lg border-b border-slate-600/50">
+                <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
                     @yield('header')
                 </div>
             </header>
@@ -72,5 +71,4 @@
 
     @stack('scripts')
 </body>
-
 </html>

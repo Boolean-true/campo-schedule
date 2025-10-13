@@ -4,7 +4,7 @@
 
 @section('header')
     <div class="flex justify-between items-center">
-        <h1 class="text-4xl font-black text-white leading-tight tracking-tight">
+        <h1 class="text-xl font-black text-white leading-tight tracking-tight">
             📅 Stundenplan
         </h1>
     </div>
