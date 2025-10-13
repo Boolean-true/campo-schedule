@@ -287,26 +287,15 @@ class ScheduleCalendar {
     }
 
     openGoogleMaps(geo, location) {
-        const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
         let url;
         if (geo && geo.includes(';')) {
             const coords = geo.replace(';', ',');
-            url = isMobile
-                ? `https://maps.google.com/maps?q=${coords}`
-                : `https://www.google.com/maps/search/${coords}`;
+            url = `https://www.google.com/maps/dir/?api=1&destination=${coords}`;
         } else {
-            const encodedLocation = encodeURIComponent(location);
-            url = isMobile
-                ? `https://maps.google.com/maps?q=${encodedLocation}`
-                : `https://www.google.com/maps/search/${encodedLocation}`;
+            url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(location)}`;
         }
 
-        if (isMobile) {
-            window.open(url);
-        } else {
-            window.open(url, '_blank');
-        }
+        window.open(url, '_blank', 'noopener,noreferrer');
     }
 
     destroy() {
