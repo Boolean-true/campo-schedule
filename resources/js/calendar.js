@@ -44,6 +44,8 @@ class ScheduleCalendar {
             eventColor: '#6366f1',
             eventTextColor: '#fff',
             eventDisplay: 'block',
+            slotEventOverlap: false,
+            eventOverlap: false,
             eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
             eventContent: this.renderEventContent.bind(this),
             eventClick: this.handleEventClick.bind(this),
