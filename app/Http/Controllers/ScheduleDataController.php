@@ -7,7 +7,7 @@ use ICal\ICal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
-class ScheduleDataController extends Controller
+class ScheduleDataController
 {
     public function __invoke(Request $request)
     {

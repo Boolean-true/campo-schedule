@@ -12,8 +12,8 @@
 */
 
 pest()->extend(Tests\TestCase::class)
- // ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
-    ->in('Feature', 'Browser');
+    ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
+    ->in('Unit', 'Feature', 'Browser');
 
 /*
 |--------------------------------------------------------------------------
