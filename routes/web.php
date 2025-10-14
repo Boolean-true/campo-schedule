@@ -8,11 +8,9 @@ use App\Livewire\Settings\TwoFactor;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
-Route::get('/', ScheduleViewController::class);
-
-Route::view('dashboard', 'dashboard')
+Route::get('/', ScheduleViewController::class)
     ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+    ->name('schedule');
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');

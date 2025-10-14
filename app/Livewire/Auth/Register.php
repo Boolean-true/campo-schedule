@@ -38,6 +38,6 @@ class Register extends Component
 
         Session::regenerate();
 
-        $this->redirect(route('dashboard', absolute: false), navigate: true);
+        $this->redirect(route('schedule', absolute: false), navigate: true);
     }
 }
