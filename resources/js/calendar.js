@@ -318,7 +318,34 @@ class ScheduleCalendar {
     }
 }
 
+// Global calendar instance
+let calendarInstance = null;
+
+// Initialize calendar function
+function initializeCalendar() {
+    // Clean up existing instance
+    if (calendarInstance) {
+        calendarInstance.destroy();
+        calendarInstance = null;
+    }
+
+    // Check if calendar element exists
+    const calendarEl = document.getElementById('calendar');
+    if (calendarEl) {
+        calendarInstance = new ScheduleCalendar('calendar');
+    }
+}
+
 // Initialize calendar when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    new ScheduleCalendar('calendar');
+document.addEventListener('DOMContentLoaded', initializeCalendar);
+
+// Handle Livewire navigation events
+document.addEventListener('livewire:navigated', initializeCalendar);
+
+// Clean up when navigating away
+document.addEventListener('livewire:navigating', () => {
+    if (calendarInstance) {
+        calendarInstance.destroy();
+        calendarInstance = null;
+    }
 });
