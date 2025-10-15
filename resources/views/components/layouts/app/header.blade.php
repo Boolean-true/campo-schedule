@@ -5,8 +5,8 @@
     @include('partials.head')
 </head>
 
-<body class="min-h-screen bg-white dark:bg-zinc-800">
-    <flux:header container class="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+<body class="min-h-screen bg-white dark:bg-slate-800">
+    <flux:header container class="border-b border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-900">
         <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
         <a href="{{ route('schedule') }}" class="ms-2 me-5 flex items-center space-x-2 rtl:space-x-reverse lg:ms-0"
@@ -44,7 +44,7 @@
                         <div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
                             <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg">
                                 <span
-                                    class="flex h-full w-full items-center justify-center rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                                    class="flex h-full w-full items-center justify-center rounded-lg bg-neutral-200 text-black dark:bg-slate-700 dark:text-white">
                                     {{ auth()->user()->initials() }}
                                 </span>
                             </span>
@@ -78,7 +78,7 @@
 
     <!-- Mobile Menu -->
     <flux:sidebar stashable sticky
-        class="lg:hidden border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+        class="lg:hidden border-e border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-900">
         <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
         <a href="{{ route('schedule') }}" class="ms-1 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
