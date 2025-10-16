@@ -8,6 +8,10 @@ final class ScheduleViewController
 {
     public function __invoke(): \Illuminate\Contracts\View\View|\Illuminate\Contracts\View\Factory
     {
-        return view('schedule');
+        $hasIcsUrl = auth()->user()->ics_url !== null;
+
+        return view('schedule', [
+            'hasIcsUrl' => $hasIcsUrl,
+        ]);
     }
 }

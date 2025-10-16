@@ -6,13 +6,20 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\EventResource;
 use ICal\ICal;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 final class ScheduleDataController
 {
-    public function __invoke()
+    public function __invoke(Request $request)
     {
-        $response = Http::get(config('schedule.ics_url'));
+        $user = $request->user();
+
+        if (! $user->ics_url) {
+            return response()->json(['error' => 'no ics url configured'], 400);
+        }
+
+        $response = Http::get($user->ics_url);
         if ($response->failed()) {
             return response()->json(['error' => 'schedule could not be loaded'], 500);
         }

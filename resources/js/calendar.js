@@ -80,14 +80,29 @@ class ScheduleCalendar {
 
     async loadEvents(info, successCallback, failureCallback) {
         try {
+            await fetch('/sanctum/csrf-cookie', {
+                credentials: 'same-origin'
+            });
+
             const response = await fetch('/api/schedule', {
                 headers: {
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
-                }
+                },
+                credentials: 'same-origin'
             });
 
             if (!response.ok) {
+                if (response.status === 401) {
+                    console.error('Unauthorized: User not authenticated');
+                    failureCallback(new Error('Authentication required'));
+                    return;
+                }
+                if (response.status === 400) {
+                    console.error('Bad Request: ICS URL not configured');
+                    failureCallback(new Error('ICS URL not configured'));
+                    return;
+                }
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
