@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Resources\EventResource;
@@ -7,7 +9,7 @@ use ICal\ICal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
-class ScheduleDataController
+final class ScheduleDataController
 {
     public function __invoke(Request $request)
     {
