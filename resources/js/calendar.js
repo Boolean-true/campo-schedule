@@ -8,6 +8,7 @@ class ScheduleCalendar {
     constructor(elementId) {
         this.calendarEl = document.getElementById(elementId);
         this.calendar = null;
+        this.csrfInitialized = false;
         this.init();
     }
 
@@ -80,9 +81,12 @@ class ScheduleCalendar {
 
     async loadEvents(info, successCallback, failureCallback) {
         try {
-            await fetch('/sanctum/csrf-cookie', {
-                credentials: 'same-origin'
-            });
+            if (!this.csrfInitialized) {
+                await fetch('/sanctum/csrf-cookie', {
+                    credentials: 'same-origin'
+                });
+                this.csrfInitialized = true;
+            }
 
             const response = await fetch('/api/schedule', {
                 headers: {
