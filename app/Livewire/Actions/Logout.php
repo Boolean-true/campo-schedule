@@ -12,7 +12,8 @@ final class Logout
     /**
      * Log the current user out of the application.
      */
-    public function __invoke(): \Illuminate\Routing\Redirector|\Illuminate\Http\RedirectResponse
+    /** @phpstan-ignore-next-line return.unusedType */
+    public function __invoke(): \Illuminate\Http\RedirectResponse|\Livewire\Features\SupportRedirects\Redirector
     {
         Auth::guard('web')->logout();
 
