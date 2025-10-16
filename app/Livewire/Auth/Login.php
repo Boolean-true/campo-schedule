@@ -61,7 +61,7 @@ final class Login extends Component
     /**
      * Validate the user's credentials.
      */
-    protected function validateCredentials(): Authenticatable
+    private function validateCredentials(): Authenticatable
     {
         $user = Auth::getProvider()->retrieveByCredentials(['email' => $this->email, 'password' => $this->password]);
 
@@ -79,7 +79,7 @@ final class Login extends Component
     /**
      * Ensure the authentication request is not rate limited.
      */
-    protected function ensureIsNotRateLimited(): void
+    private function ensureIsNotRateLimited(): void
     {
         if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
             return;
@@ -100,7 +100,7 @@ final class Login extends Component
     /**
      * Get the authentication rate limiting throttle key.
      */
-    protected function throttleKey(): string
+    private function throttleKey(): string
     {
         return Str::transliterate(Str::lower($this->email).'|'.request()->ip());
     }

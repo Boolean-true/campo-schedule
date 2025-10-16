@@ -10,7 +10,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 final class EventResource extends JsonResource
 {
-    public function toArray(Request $request): ?array
+    public function toArray(Request $request): array
     {
         /** @var Event $event */
         $event = $this->resource;
