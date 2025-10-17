@@ -228,10 +228,11 @@ class ScheduleCalendar {
         }
 
         if (this.isFetching) {
-            // Poll until isFetching is false, then re-invoke loadEvents
-            setTimeout(() => {
-                this.loadEvents(info, successCallback, failureCallback);
-            }, 100);
+            if (this.cachedEvents !== null) {
+                successCallback(this.cachedEvents);
+            } else {
+                successCallback([]);
+            }
             return;
         }
 
@@ -278,7 +279,10 @@ class ScheduleCalendar {
             this.isStale = data._stale || false;
             this.lastUpdated = data._timestamp || Date.now();
 
-            const events = (data.data || []).map((event) => ({
+            const eventData = Array.isArray(data.data)
+                ? data.data
+                : (Array.isArray(data) ? data : []);
+            const events = eventData.map((event) => ({
                 ...event,
                 color: this.getEventColor(event),
             }));
@@ -303,7 +307,7 @@ class ScheduleCalendar {
             if (this.cachedEvents !== null) {
                 successCallback(this.cachedEvents);
             } else {
-                failureCallback(error);
+                successCallback([]);
             }
         }
     }
