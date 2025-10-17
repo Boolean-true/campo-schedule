@@ -501,19 +501,22 @@ class ScheduleCalendar {
             });
         }
 
-        // ESC key handler
-        const escHandler = (e) => {
+        modal._escHandler = (e) => {
             if (e.key === "Escape") {
                 this.closeModal(modal);
-                document.removeEventListener("keydown", escHandler);
             }
         };
-        document.addEventListener("keydown", escHandler);
+        document.addEventListener("keydown", modal._escHandler);
 
         return modal;
     }
 
     closeModal(modal) {
+        if (modal._escHandler) {
+            document.removeEventListener("keydown", modal._escHandler);
+            modal._escHandler = null;
+        }
+
         modal.classList.remove("opacity-100");
         const modalContent = modal.querySelector(".modal-content");
         modalContent.classList.remove("translate-y-0", "sm:scale-100");
