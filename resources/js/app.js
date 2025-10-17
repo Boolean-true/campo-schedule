@@ -5,8 +5,6 @@ if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
         navigator.serviceWorker.register("/service-worker.js")
             .then((registration) => {
-                console.log("Service Worker registered:", registration.scope);
-
                 registration.addEventListener("updatefound", () => {
                     const newWorker = registration.installing;
                     newWorker.addEventListener("statechange", () => {

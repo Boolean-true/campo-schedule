@@ -12,11 +12,9 @@ const STATIC_ASSETS = [
 ];
 
 self.addEventListener("install", (event) => {
-    console.log("[SW] Installing service worker...");
     event.waitUntil(
         caches.open(STATIC_CACHE)
             .then((cache) => {
-                console.log("[SW] Precaching static assets...");
                 return cache.addAll(STATIC_ASSETS).catch((err) => {
                     console.warn("[SW] Failed to precache some assets:", err);
                 });
@@ -26,7 +24,6 @@ self.addEventListener("install", (event) => {
 });
 
 self.addEventListener("activate", (event) => {
-    console.log("[SW] Activating service worker...");
     event.waitUntil(
         caches.keys().then((cacheNames) => {
             return Promise.all(
@@ -37,12 +34,10 @@ self.addEventListener("activate", (event) => {
                         name !== STATIC_CACHE
                     )
                     .map((name) => {
-                        console.log("[SW] Deleting old cache:", name);
                         return caches.delete(name);
                     }),
             );
         }).then(() => {
-            console.log("[SW] Service worker activated and ready!");
             return self.clients.claim();
         }),
     );
@@ -57,7 +52,6 @@ self.addEventListener("fetch", (event) => {
     }
 
     if (url.pathname === "/api/schedule") {
-        console.log("[SW] Intercepting schedule request");
         event.respondWith(handleScheduleRequest(request));
         return;
     }
@@ -82,11 +76,9 @@ self.addEventListener("fetch", (event) => {
 
 async function handleScheduleRequest(request) {
     try {
-        console.log("[SW] Fetching schedule from network...");
         const response = await fetch(request);
 
         if (response.ok) {
-            console.log("[SW] Schedule fetched successfully, caching...");
             const clonedResponse = response.clone();
             const data = await clonedResponse.json();
 
@@ -104,13 +96,8 @@ async function handleScheduleRequest(request) {
                 },
             );
             await cache.put(`${request.url}-timestamp`, timestampResponse);
-            console.log("[SW] Schedule cached successfully!");
             return response;
         } else {
-            console.log(
-                "[SW] Schedule fetch failed with status:",
-                response.status,
-            );
             throw new Error(`HTTP ${response.status}`);
         }
     } catch (_error) {
@@ -118,7 +105,6 @@ async function handleScheduleRequest(request) {
         const cachedResponse = await caches.match(request);
 
         if (cachedResponse) {
-            console.log("[SW] Found cached schedule, returning offline data");
             const timestampResponse = await caches.match(
                 `${request.url}-timestamp`,
             );
@@ -149,7 +135,6 @@ async function handleScheduleRequest(request) {
             });
         }
 
-        console.log("[SW] No cached data available");
         return new Response(
             JSON.stringify({ error: "No cached data available" }),
             {
