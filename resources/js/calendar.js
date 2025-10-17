@@ -44,6 +44,7 @@ class ScheduleCalendar {
         });
 
         this.isOffline = !navigator.onLine;
+        this.updateOfflineIndicator();
     }
 
     updateOfflineIndicator() {
