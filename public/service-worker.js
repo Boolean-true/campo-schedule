@@ -72,7 +72,7 @@ self.addEventListener("fetch", (event) => {
         url.pathname.endsWith(".svg") ||
         url.pathname.endsWith(".webp")
     ) {
-        event.respondWith(handleStaticAsset(request));
+        event.respondWith(handleStaticAsset(request, event));
         return;
     }
 });
@@ -151,16 +151,18 @@ async function handleScheduleRequest(request) {
     }
 }
 
-async function handleStaticAsset(request) {
+async function handleStaticAsset(request, event) {
     const cache = await caches.open(STATIC_CACHE);
     const cachedResponse = await cache.match(request);
 
     if (cachedResponse) {
-        fetch(request).then((response) => {
-            if (response.ok) {
-                cache.put(request, response.clone());
-            }
-        }).catch(() => {});
+        event.waitUntil(
+            fetch(request).then((response) => {
+                if (response.ok) {
+                    return cache.put(request, response.clone());
+                }
+            }).catch(() => {}),
+        );
         return cachedResponse;
     }
 

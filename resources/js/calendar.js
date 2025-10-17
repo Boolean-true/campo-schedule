@@ -516,7 +516,11 @@ class ScheduleCalendar {
         if (campoLink) {
             campoLink.addEventListener("click", (e) => {
                 e.preventDefault();
-                window.open(e.target.closest(".campo-link").dataset.url);
+                window.open(
+                    e.target.closest(".campo-link").dataset.url,
+                    "_blank",
+                    "noopener,noreferrer",
+                );
             });
         }
 
