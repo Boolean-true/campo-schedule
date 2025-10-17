@@ -277,7 +277,13 @@ class ScheduleCalendar {
 
             this.isOffline = data._offline || isFromServiceWorker || false;
             this.isStale = data._stale || false;
-            this.lastUpdated = data._timestamp || Date.now();
+            if (typeof data._timestamp === 'number') {
+                this.lastUpdated = data._timestamp;
+            } else if (!isFromServiceWorker) {
+                this.lastUpdated = Date.now();
+            } else {
+                this.lastUpdated = null;
+            }
 
             const eventData = Array.isArray(data.data)
                 ? data.data
