@@ -15,6 +15,8 @@ class ScheduleCalendar {
         this.cachedEvents = null;
         this.cachedRange = null;
         this.isFetching = false;
+        this._onlineHandler = null;
+        this._offlineHandler = null;
         this.init();
         this.setupOfflineDetection();
     }
@@ -22,7 +24,7 @@ class ScheduleCalendar {
     setupOfflineDetection() {
         let onlineTimeout = null;
 
-        window.addEventListener("online", () => {
+        this._onlineHandler = () => {
             this.isOffline = false;
             this.updateOfflineIndicator();
 
@@ -38,12 +40,15 @@ class ScheduleCalendar {
                 }
                 onlineTimeout = null;
             }, 100);
-        });
+        };
 
-        window.addEventListener("offline", () => {
+        this._offlineHandler = () => {
             this.isOffline = true;
             this.updateOfflineIndicator();
-        });
+        };
+
+        window.addEventListener("online", this._onlineHandler);
+        window.addEventListener("offline", this._offlineHandler);
 
         this.isOffline = !navigator.onLine;
         this.updateOfflineIndicator();
@@ -277,7 +282,7 @@ class ScheduleCalendar {
 
             this.isOffline = data._offline || isFromServiceWorker || false;
             this.isStale = data._stale || false;
-            if (typeof data._timestamp === 'number') {
+            if (typeof data._timestamp === "number") {
                 this.lastUpdated = data._timestamp;
             } else if (!isFromServiceWorker) {
                 this.lastUpdated = Date.now();
@@ -565,6 +570,16 @@ class ScheduleCalendar {
     }
 
     destroy() {
+        if (this._onlineHandler) {
+            window.removeEventListener("online", this._onlineHandler);
+            this._onlineHandler = null;
+        }
+
+        if (this._offlineHandler) {
+            window.removeEventListener("offline", this._offlineHandler);
+            this._offlineHandler = null;
+        }
+
         if (this.calendar) {
             this.calendar.destroy();
         }
