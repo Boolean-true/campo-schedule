@@ -344,7 +344,7 @@ class ScheduleCalendar {
         const modal = this.createModal(event);
         document.body.appendChild(modal);
 
-        // Prevent body scrolling
+        modal._prevOverflow = document.body.style.overflow;
         document.body.style.overflow = "hidden";
 
         // Trigger animation
@@ -540,8 +540,7 @@ class ScheduleCalendar {
             "sm:scale-95",
         );
 
-        // Restore body scrolling
-        document.body.style.overflow = "";
+        document.body.style.overflow = modal._prevOverflow ?? "";
 
         setTimeout(() => {
             if (modal.parentNode) {
