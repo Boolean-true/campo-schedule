@@ -35,7 +35,7 @@ function showUpdateNotification(registration) {
     const notification = document.createElement("div");
     notification.className =
         "fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:max-w-sm bg-slate-800/95 backdrop-blur-md text-white p-3 rounded-xl shadow-xl z-[10000] border border-slate-700/50";
-    notification.setAttribute("role", "alert");
+    notification.setAttribute("role", "status");
     notification.setAttribute("aria-live", "polite");
     notification.setAttribute("aria-atomic", "true");
 

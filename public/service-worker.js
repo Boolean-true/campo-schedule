@@ -4,7 +4,6 @@ const STATIC_CACHE = `campo-schedule-static-${CACHE_VERSION}`;
 const CACHE_DURATION = 1000 * 60 * 60 * 24;
 
 const STATIC_ASSETS = [
-    "/",
     "/build/manifest.json",
     "/manifest.json",
     "/favicon.png",

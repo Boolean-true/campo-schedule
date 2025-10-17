@@ -58,9 +58,9 @@ class ScheduleCalendar {
                 indicator.id = "offline-indicator";
                 indicator.className =
                     "fixed top-20 left-4 right-4 md:left-auto md:right-4 md:max-w-md z-50 transition-all duration-300";
-                indicator.setAttribute('role', 'status');
-                indicator.setAttribute('aria-live', 'polite');
-                indicator.setAttribute('aria-atomic', 'true');
+                indicator.setAttribute("role", "status");
+                indicator.setAttribute("aria-live", "polite");
+                indicator.setAttribute("aria-atomic", "true");
                 document.body.appendChild(indicator);
             }
 
@@ -228,6 +228,10 @@ class ScheduleCalendar {
         }
 
         if (this.isFetching) {
+            // Poll until isFetching is false, then re-invoke loadEvents
+            setTimeout(() => {
+                this.loadEvents(info, successCallback, failureCallback);
+            }, 100);
             return;
         }
 
