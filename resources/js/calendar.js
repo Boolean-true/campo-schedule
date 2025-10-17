@@ -9,7 +9,101 @@ class ScheduleCalendar {
         this.calendarEl = document.getElementById(elementId);
         this.calendar = null;
         this.csrfInitialized = false;
+        this.isOffline = false;
+        this.lastUpdated = null;
+        this.isStale = false;
         this.init();
+        this.setupOfflineDetection();
+    }
+
+    setupOfflineDetection() {
+        window.addEventListener('online', () => {
+            this.isOffline = false;
+            this.updateOfflineIndicator();
+            if (this.calendar) {
+                this.calendar.refetchEvents();
+            }
+        });
+
+        window.addEventListener('offline', () => {
+            this.isOffline = true;
+            this.updateOfflineIndicator();
+        });
+
+        this.isOffline = !navigator.onLine;
+    }
+
+    updateOfflineIndicator() {
+        let indicator = document.getElementById('offline-indicator');
+
+        if (this.isOffline || this.lastUpdated) {
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.id = 'offline-indicator';
+                indicator.className = 'fixed top-20 left-4 right-4 md:left-auto md:right-4 md:max-w-md z-50 transition-all duration-300';
+                document.body.appendChild(indicator);
+            }
+
+            let content = '';
+            if (this.isOffline) {
+                content = `
+                    <div class="bg-amber-600/95 backdrop-blur-md text-white p-4 rounded-xl shadow-2xl border border-amber-500/50 flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-amber-500/30 rounded-full flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414" style="opacity: 0.5"></path>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <div class="font-semibold">Offline Modus</div>
+                            <div class="text-sm text-amber-100">
+                                ${this.lastUpdated ? this.formatLastUpdated() : 'Zwischengespeicherte Daten'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (this.lastUpdated && this.isStale) {
+                content = `
+                    <div class="bg-blue-600/95 backdrop-blur-md text-white p-3 rounded-xl shadow-xl border border-blue-500/50 flex items-center space-x-3">
+                        <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div class="flex-1 text-sm">
+                            ${this.formatLastUpdated()}
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (content) {
+                indicator.innerHTML = content;
+                indicator.style.display = 'block';
+            } else {
+                indicator.style.display = 'none';
+            }
+        } else if (indicator) {
+            indicator.style.display = 'none';
+        }
+    }
+
+    formatLastUpdated() {
+        if (!this.lastUpdated) return '';
+
+        const now = Date.now();
+        const diff = now - this.lastUpdated;
+
+        const minutes = Math.floor(diff / 60000);
+        const hours = Math.floor(diff / 3600000);
+        const days = Math.floor(diff / 86400000);
+
+        if (days > 0) {
+            return `Aktualisiert vor ${days} Tag${days > 1 ? 'en' : ''}`;
+        } else if (hours > 0) {
+            return `Aktualisiert vor ${hours} Stunde${hours > 1 ? 'n' : ''}`;
+        } else if (minutes > 0) {
+            return `Aktualisiert vor ${minutes} Minute${minutes > 1 ? 'n' : ''}`;
+        } else {
+            return 'Gerade aktualisiert';
+        }
     }
 
     init() {
@@ -111,13 +205,28 @@ class ScheduleCalendar {
             }
 
             const data = await response.json();
+            
+            const isFromServiceWorker = response.headers.get('X-Offline-Response') === 'true';
+            
+            this.isOffline = data._offline || isFromServiceWorker || false;
+            this.isStale = data._stale || false;
+            this.lastUpdated = data._timestamp || Date.now();
+            
             const events = (data.data || []).map(event => ({
                 ...event,
                 color: this.getEventColor(event)
             }));
+            
+            this.updateOfflineIndicator();
             successCallback(events);
         } catch (error) {
             console.error('Failed to load calendar events:', error);
+            
+            if (!navigator.onLine) {
+                this.isOffline = true;
+                this.updateOfflineIndicator();
+            }
+            
             failureCallback(error);
         }
     }
