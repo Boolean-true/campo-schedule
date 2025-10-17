@@ -89,7 +89,7 @@ async function handleScheduleRequest(request) {
             const scheduleResponse = new Response(JSON.stringify(data), {
                 headers: { "Content-Type": "application/json" },
             });
-            await cache.put(request, scheduleResponse);
+            await cache.put(request, scheduleResponse.clone());
 
             const timestamp = Date.now();
             const timestampResponse = new Response(
@@ -98,7 +98,10 @@ async function handleScheduleRequest(request) {
                     headers: { "Content-Type": "application/json" },
                 },
             );
-            await cache.put(`${request.url}-timestamp`, timestampResponse);
+            await cache.put(
+                `${request.url}-timestamp`,
+                timestampResponse.clone(),
+            );
             return response;
         } else {
             throw new Error(`HTTP ${response.status}`);
@@ -155,7 +158,7 @@ async function handleStaticAsset(request) {
     if (cachedResponse) {
         fetch(request).then((response) => {
             if (response.ok) {
-                cache.put(request, response);
+                cache.put(request, response.clone());
             }
         }).catch(() => {});
         return cachedResponse;

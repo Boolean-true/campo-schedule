@@ -580,6 +580,11 @@ class ScheduleCalendar {
             this._offlineHandler = null;
         }
 
+        const indicator = document.getElementById("offline-indicator");
+        if (indicator) {
+            indicator.remove();
+        }
+
         if (this.calendar) {
             this.calendar.destroy();
         }
