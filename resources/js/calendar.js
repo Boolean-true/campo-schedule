@@ -13,6 +13,7 @@ class ScheduleCalendar {
         this.lastUpdated = null;
         this.isStale = false;
         this.cachedEvents = null;
+        this.cachedRange = null;
         this.isFetching = false;
         this.init();
         this.setupOfflineDetection();
@@ -32,6 +33,7 @@ class ScheduleCalendar {
             onlineTimeout = setTimeout(() => {
                 if (this.calendar && !this.isFetching) {
                     this.cachedEvents = null;
+                    this.cachedRange = null;
                     this.calendar.refetchEvents();
                 }
                 onlineTimeout = null;
@@ -72,7 +74,7 @@ class ScheduleCalendar {
                             </svg>
                         </div>
                         <div class="flex-1">
-                            <div class="font-semibold">Offline Modus</div>
+                            <div class="font-semibold">Offline-Modus</div>
                             <div class="text-sm text-amber-100">
                                 ${
                     this.lastUpdated
@@ -211,7 +213,16 @@ class ScheduleCalendar {
     }
 
     async loadEvents(info, successCallback, failureCallback) {
-        if (this.cachedEvents !== null && !this.isFetching) {
+        const requestedStart = info.start.toISOString();
+        const requestedEnd = info.end.toISOString();
+
+        if (
+            this.cachedEvents !== null &&
+            !this.isFetching &&
+            this.cachedRange !== null &&
+            this.cachedRange.start === requestedStart &&
+            this.cachedRange.end === requestedEnd
+        ) {
             successCallback(this.cachedEvents);
             return;
         }
@@ -269,6 +280,10 @@ class ScheduleCalendar {
             }));
 
             this.cachedEvents = events;
+            this.cachedRange = {
+                start: requestedStart,
+                end: requestedEnd,
+            };
             this.isFetching = false;
             this.updateOfflineIndicator();
             successCallback(events);
