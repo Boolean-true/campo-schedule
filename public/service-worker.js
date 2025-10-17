@@ -1,29 +1,48 @@
 const CACHE_VERSION = "v1";
 const SCHEDULE_CACHE = `campo-schedule-data-${CACHE_VERSION}`;
+const STATIC_CACHE = `campo-schedule-static-${CACHE_VERSION}`;
 const CACHE_DURATION = 1000 * 60 * 60 * 24;
 
+const STATIC_ASSETS = [
+    "/",
+    "/build/manifest.json",
+    "/manifest.json",
+    "/favicon.png",
+    "/favicon-192x192.png",
+];
+
 self.addEventListener("install", (event) => {
-    console.log('[SW] Installing service worker...');
-    event.waitUntil(self.skipWaiting());
+    console.log("[SW] Installing service worker...");
+    event.waitUntil(
+        caches.open(STATIC_CACHE)
+            .then((cache) => {
+                console.log("[SW] Precaching static assets...");
+                return cache.addAll(STATIC_ASSETS).catch((err) => {
+                    console.warn("[SW] Failed to precache some assets:", err);
+                });
+            })
+            .then(() => self.skipWaiting()),
+    );
 });
 
 self.addEventListener("activate", (event) => {
-    console.log('[SW] Activating service worker...');
+    console.log("[SW] Activating service worker...");
     event.waitUntil(
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames
                     .filter((name) =>
                         name.startsWith("campo-schedule-") &&
-                        name !== SCHEDULE_CACHE
+                        name !== SCHEDULE_CACHE &&
+                        name !== STATIC_CACHE
                     )
                     .map((name) => {
-                        console.log('[SW] Deleting old cache:', name);
+                        console.log("[SW] Deleting old cache:", name);
                         return caches.delete(name);
                     }),
             );
         }).then(() => {
-            console.log('[SW] Service worker activated and ready!');
+            console.log("[SW] Service worker activated and ready!");
             return self.clients.claim();
         }),
     );
@@ -38,19 +57,36 @@ self.addEventListener("fetch", (event) => {
     }
 
     if (url.pathname === "/api/schedule") {
-        console.log('[SW] Intercepting schedule request');
+        console.log("[SW] Intercepting schedule request");
         event.respondWith(handleScheduleRequest(request));
+        return;
+    }
+
+    if (
+        url.pathname.startsWith("/build/") ||
+        url.pathname.endsWith(".js") ||
+        url.pathname.endsWith(".css") ||
+        url.pathname.endsWith(".woff2") ||
+        url.pathname.endsWith(".woff") ||
+        url.pathname.endsWith(".ttf") ||
+        url.pathname.endsWith(".png") ||
+        url.pathname.endsWith(".jpg") ||
+        url.pathname.endsWith(".jpeg") ||
+        url.pathname.endsWith(".svg") ||
+        url.pathname.endsWith(".webp")
+    ) {
+        event.respondWith(handleStaticAsset(request));
         return;
     }
 });
 
 async function handleScheduleRequest(request) {
     try {
-        console.log('[SW] Fetching schedule from network...');
+        console.log("[SW] Fetching schedule from network...");
         const response = await fetch(request);
 
         if (response.ok) {
-            console.log('[SW] Schedule fetched successfully, caching...');
+            console.log("[SW] Schedule fetched successfully, caching...");
             const clonedResponse = response.clone();
             const data = await clonedResponse.json();
 
@@ -68,18 +104,21 @@ async function handleScheduleRequest(request) {
                 },
             );
             await cache.put(`${request.url}-timestamp`, timestampResponse);
-            console.log('[SW] Schedule cached successfully!');
+            console.log("[SW] Schedule cached successfully!");
+            return response;
         } else {
-            console.log('[SW] Schedule fetch failed with status:', response.status);
+            console.log(
+                "[SW] Schedule fetch failed with status:",
+                response.status,
+            );
+            throw new Error(`HTTP ${response.status}`);
         }
-
-        return response;
     } catch (_error) {
-        console.log('[SW] Network failed, checking cache...');
+        console.log("[SW] Fetch failed, checking cache...");
         const cachedResponse = await caches.match(request);
 
         if (cachedResponse) {
-            console.log('[SW] Found cached schedule, returning offline data');
+            console.log("[SW] Found cached schedule, returning offline data");
             const timestampResponse = await caches.match(
                 `${request.url}-timestamp`,
             );
@@ -110,7 +149,7 @@ async function handleScheduleRequest(request) {
             });
         }
 
-        console.log('[SW] No cached data available');
+        console.log("[SW] No cached data available");
         return new Response(
             JSON.stringify({ error: "No cached data available" }),
             {
@@ -118,6 +157,31 @@ async function handleScheduleRequest(request) {
                 headers: { "Content-Type": "application/json" },
             },
         );
+    }
+}
+
+async function handleStaticAsset(request) {
+    const cache = await caches.open(STATIC_CACHE);
+    const cachedResponse = await cache.match(request);
+
+    if (cachedResponse) {
+        fetch(request).then((response) => {
+            if (response.ok) {
+                cache.put(request, response);
+            }
+        }).catch(() => {});
+        return cachedResponse;
+    }
+
+    try {
+        const response = await fetch(request);
+        if (response.ok) {
+            cache.put(request, response.clone());
+        }
+        return response;
+    } catch (error) {
+        console.log("[SW] Failed to fetch static asset:", request.url);
+        return new Response("", { status: 503 });
     }
 }
 

@@ -12,17 +12,30 @@ class ScheduleCalendar {
         this.isOffline = false;
         this.lastUpdated = null;
         this.isStale = false;
+        this.cachedEvents = null;
+        this.isFetching = false;
         this.init();
         this.setupOfflineDetection();
     }
 
     setupOfflineDetection() {
+        let onlineTimeout = null;
+
         window.addEventListener("online", () => {
             this.isOffline = false;
             this.updateOfflineIndicator();
-            if (this.calendar) {
-                this.calendar.refetchEvents();
+
+            if (onlineTimeout) {
+                clearTimeout(onlineTimeout);
             }
+
+            onlineTimeout = setTimeout(() => {
+                if (this.calendar && !this.isFetching) {
+                    this.cachedEvents = null;
+                    this.calendar.refetchEvents();
+                }
+                onlineTimeout = null;
+            }, 100);
         });
 
         window.addEventListener("offline", () => {
@@ -194,6 +207,17 @@ class ScheduleCalendar {
     }
 
     async loadEvents(info, successCallback, failureCallback) {
+        if (this.cachedEvents !== null && !this.isFetching) {
+            successCallback(this.cachedEvents);
+            return;
+        }
+
+        if (this.isFetching) {
+            return;
+        }
+
+        this.isFetching = true;
+
         try {
             if (!this.csrfInitialized) {
                 await fetch("/sanctum/csrf-cookie", {
@@ -213,11 +237,13 @@ class ScheduleCalendar {
             if (!response.ok) {
                 if (response.status === 401) {
                     console.error("Unauthorized: User not authenticated");
+                    this.isFetching = false;
                     failureCallback(new Error("Authentication required"));
                     return;
                 }
                 if (response.status === 400) {
                     console.error("Bad Request: ICS URL not configured");
+                    this.isFetching = false;
                     failureCallback(new Error("ICS URL not configured"));
                     return;
                 }
@@ -238,17 +264,24 @@ class ScheduleCalendar {
                 color: this.getEventColor(event),
             }));
 
+            this.cachedEvents = events;
+            this.isFetching = false;
             this.updateOfflineIndicator();
             successCallback(events);
         } catch (error) {
             console.error("Failed to load calendar events:", error);
+            this.isFetching = false;
 
             if (!navigator.onLine) {
                 this.isOffline = true;
                 this.updateOfflineIndicator();
             }
 
-            failureCallback(error);
+            if (this.cachedEvents !== null) {
+                successCallback(this.cachedEvents);
+            } else {
+                failureCallback(error);
+            }
         }
     }
 
@@ -505,20 +538,31 @@ class ScheduleCalendar {
 
 // Global calendar instance
 let calendarInstance = null;
+let isInitializing = false;
 
 // Initialize calendar function
 function initializeCalendar() {
-    // Clean up existing instance
-    if (calendarInstance) {
-        calendarInstance.destroy();
-        calendarInstance = null;
+    if (isInitializing) {
+        return;
     }
 
-    // Check if calendar element exists
     const calendarEl = document.getElementById("calendar");
-    if (calendarEl) {
-        calendarInstance = new ScheduleCalendar("calendar");
+
+    if (!calendarEl) {
+        if (calendarInstance) {
+            calendarInstance.destroy();
+            calendarInstance = null;
+        }
+        return;
     }
+
+    if (calendarInstance) {
+        return;
+    }
+
+    isInitializing = true;
+    calendarInstance = new ScheduleCalendar("calendar");
+    isInitializing = false;
 }
 
 // Initialize calendar when DOM is ready
